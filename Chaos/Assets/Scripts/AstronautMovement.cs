@@ -10,6 +10,7 @@ public class AstronautMovement : MonoBehaviour
     public float speed;
     public bool hasJumped = false;
     public bool gravityOn = true;
+    public Animator animatorController;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,10 +24,15 @@ public class AstronautMovement : MonoBehaviour
         vertical = Input.GetAxis("Vertical");
         if(horizontal > 0)
         {
+            animatorController.SetBool("Running", true);
             Flip(false);
         } else if (horizontal < 0)
         {
+            animatorController.SetBool("Running", true);
             Flip(true);
+        } else 
+        {
+            animatorController.SetBool("Running", false);
         }
         if (Input.GetKeyDown(KeyCode.Space) && !hasJumped)
         {
@@ -46,10 +52,12 @@ public class AstronautMovement : MonoBehaviour
 
     void FixedUpdate() 
     {
-        rigidBody.AddForce(new Vector2(horizontal, 0.0f) * speed, ForceMode2D.Force);
         if (!gravityOn)
         {
-            rigidBody.AddForce(new Vector2(horizontal, vertical) * (speed / 2.5f), ForceMode2D.Force);
+            rigidBody.AddForce(new Vector2(horizontal, vertical) * (speed / 25f), ForceMode2D.Impulse);
+        } else 
+        {
+            transform.position += (new Vector3(horizontal, 0.0f, 0.0f) * Time.deltaTime * speed);
         }
     }
 
@@ -71,10 +79,10 @@ public class AstronautMovement : MonoBehaviour
 
     void Flip(bool left)
     {
-        float flipVar = 180.0f;
+        float flipVar = 0.0f;
         if(left)
         {
-            flipVar = 0.0f;
+            flipVar = 180.0f;
         }
         this.transform.rotation = new Quaternion(0.0f, flipVar, 0.0f, 0.0f);
     }
