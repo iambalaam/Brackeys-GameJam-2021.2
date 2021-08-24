@@ -313,8 +313,9 @@ GameObject:
   - component: {fileID: 1848514560}
   - component: {fileID: 1848514559}
   - component: {fileID: 1848514558}
+  - component: {fileID: 1848514561}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Protagonaut
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -404,6 +405,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1848514561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1848514557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4abc5cab3ff07b1418932e5b122c87cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offset: {x: 0, y: 0}
+  radius: 16
 --- !u!1 &2085412883
 GameObject:
   m_ObjectHideFlags: 0
