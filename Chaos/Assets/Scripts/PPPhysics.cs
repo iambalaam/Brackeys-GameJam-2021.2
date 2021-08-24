@@ -8,6 +8,12 @@ public class PPPhysics : MonoBehaviour
     public float G;
     public static List<PPRB> pprbs = new List<PPRB>();
     private Vector2 gravity;
+    private PPCollider collisions;
+
+    private void Start()
+    {
+        collisions = GetComponent<PPCollider>();
+    }
 
     public void Update()
     {
@@ -21,7 +27,23 @@ public class PPPhysics : MonoBehaviour
         {
             pprb.velocity += gravity * Time.fixedDeltaTime;
             Vector2 movement = pprb.velocity * Time.fixedDeltaTime;
-            pprb.transform.position += new Vector3(movement.x, movement.y, 0);
+
+            Vector3 newPosition = pprb.transform.position + new Vector3(movement.x, movement.y, 0);
+
+            var collider = pprb.GetComponent<PPCircleCollider>();
+            if (collider != null)
+            {
+                var colliderCenter = collisions.World2Pixel(newPosition) + collider.offset;
+                if (collisions.CircleCollision(colliderCenter, collider.radius))
+                {
+                    // Stop
+                    pprb.velocity = Vector3.zero;
+                    return;
+                }
+            }
+
+            pprb.transform.position = newPosition;
+            
         }
     }
 }
