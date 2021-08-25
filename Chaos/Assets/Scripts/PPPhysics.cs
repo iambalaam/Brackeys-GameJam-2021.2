@@ -9,6 +9,7 @@ public class PPPhysics : MonoBehaviour
     public static List<PPRB> pprbs = new List<PPRB>();
     private Vector2 gravity;
     private PPCollisions collisions;
+    private int PPU = 32;
 
     private void Start()
     {
@@ -34,11 +35,21 @@ public class PPPhysics : MonoBehaviour
             if (collider != null)
             {
                 var colliderCenter = collisions.World2Pixel(newPosition) + collider.offset;
-                if (collisions.CircleCollision(colliderCenter, collider.radius))
+                var collision = collisions.CircleCollision(colliderCenter, collider.radius);
+                if (collision.HasValue)
                 {
+
                     // Handle collision
-                    pprb.velocity = Vector3.zero;
-                    return;
+                    Vector3 v3Movement = new Vector3(movement.x, movement.y, 0);
+                    Vector3 normal = new Vector3(collision.Value.x, collision.Value.y, 0).normalized;
+                    Vector3 tangent = Vector3.Cross(normal, Vector3.forward);
+
+                    Vector3 bounce = -normal * collider.bounciness * Vector3.Dot(v3Movement, normal);
+                    Vector3 slide = tangent * (1 - collider.friction) * Vector3.Dot(v3Movement, tangent);
+
+                    pprb.velocity = (bounce + slide) * PPU;
+
+                    break;
                 }
             }
 

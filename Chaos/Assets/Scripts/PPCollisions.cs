@@ -16,12 +16,6 @@ public class PPCollisions : MonoBehaviour
         renderer.sprite = foreground;
     }
 
-    private void Update()
-    {
-        Debug.Log(CircleCollision(World2Pixel(Vector3.zero), 8));
-        // Debug.Log(PointCollision(World2Pixel(Vector3.zero)));
-    }
-
     public Vector2Int World2Pixel(Vector3 worldPos)
     {
         float ppu = foreground.pixelsPerUnit;
@@ -43,24 +37,24 @@ public class PPCollisions : MonoBehaviour
         return Mathf.Sqrt(Mathf.Pow(a, 2) + Mathf.Pow(b, 2));
     }
 
-    public bool CircleCollision(Vector2Int center, int radius)
+    public Vector2Int? CircleCollision(Vector2Int center, int radius)
     {
         for (int height = radius; height >= -radius; height--)
         {
             int y = center.y - height;
 
-            if (PointCollision(new Vector2Int(center.x, y))) return true;
+            if (PointCollision(new Vector2Int(center.x, y))) return new Vector2Int(0, -height);
 
 
             for (int width = 1; Hypot(height, width) < radius + 0.5f; width++)
             {
                 int x1 = center.x + width;
                 int x2 = center.x - width;
-                if (PointCollision(new Vector2Int(x1, y))) return true;
-                if (PointCollision(new Vector2Int(x2, y))) return true;
+                if (PointCollision(new Vector2Int(x1, y))) return new Vector2Int(width, -height);
+                if (PointCollision(new Vector2Int(x2, y))) return new Vector2Int(-width, -height);
             }
         }
-        return false;
+        return null;
     }
 
     private void SetTexture(SpriteRenderer r, Texture2D t)
