@@ -7,6 +7,11 @@ public class PPCircleCollider : MonoBehaviour
     public Vector2Int offset;
     public int radius;
 
+    [Range (0,1)]
+    public float friction;
+    [Range (0,1)]
+    public float bounciness;
+
     private float PPU = 32;
 
     private void OnDrawGizmos()

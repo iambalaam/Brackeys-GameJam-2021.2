@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class PPCollider : MonoBehaviour
+public class PPCollisions : MonoBehaviour
 {
     private SpriteRenderer renderer;
 
