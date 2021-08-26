@@ -10,6 +10,7 @@ public class PPPhysics : MonoBehaviour
     private Vector2 gravity;
     private PPCollisions collisions;
     private int PPU = 32;
+    private float skin = 0.00005f;
 
     private void Start()
     {
@@ -21,40 +22,53 @@ public class PPPhysics : MonoBehaviour
         gravity = Vector2.down * G;
     }
 
+
     // Physics Loop
     public void FixedUpdate()
     {
         foreach (PPRB pprb in pprbs)
         {
-            pprb.velocity += gravity * Time.fixedDeltaTime;
-            Vector2 movement = pprb.velocity * Time.fixedDeltaTime;
+            Vector2 velocity = pprb.velocity;
+            velocity += gravity * Time.fixedDeltaTime;
 
+            // Check if pprb has agency
+            if (pprb.targetXVelocity != 0) { velocity.x = pprb.targetXVelocity; }
+
+            Vector2 movement = velocity * Time.fixedDeltaTime;
             Vector3 newPosition = pprb.transform.position + new Vector3(movement.x, movement.y, 0);
 
             var collider = pprb.GetComponent<PPCircleCollider>();
             if (collider != null)
             {
-                var colliderCenter = collisions.World2Pixel(newPosition) + collider.offset;
-                var collision = collisions.CircleCollision(colliderCenter, collider.radius);
-                if (collision.HasValue)
+                var maybeCollision = collisions.CircleCollision(newPosition, collider.radius);
+                if (maybeCollision.HasValue)
                 {
+                    var collision = maybeCollision.Value;
 
-                    // Handle collision
+                    // Normal and tangent for collision force
                     Vector3 v3Movement = new Vector3(movement.x, movement.y, 0);
-                    Vector3 normal = new Vector3(collision.Value.x, collision.Value.y, 0).normalized;
-                    Vector3 tangent = Vector3.Cross(normal, Vector3.forward);
+                    Vector3 normal = collision.normalized;
+                    Vector3 tangent = Vector3.Cross(normal, Vector3.back);
 
-                    Vector3 bounce = -normal * collider.bounciness * Vector3.Dot(v3Movement, normal);
+                    /*
+                    // Bounciness and friction
+                    Vector3 bounce = -normal * collider.bounciness * Mathf.Abs(Vector3.Dot(v3Movement, normal));
                     Vector3 slide = tangent * (1 - collider.friction) * Vector3.Dot(v3Movement, tangent);
-
                     pprb.velocity = (bounce + slide) * PPU;
+                    */
 
-                    break;
+                    // Apply impulse against collision and recalculate position
+                    velocity -= new Vector2(collision.x, collision.y) / Time.fixedDeltaTime;
+                    velocity *= 0.8f;
+                    movement = velocity * Time.fixedDeltaTime;
+                    newPosition = pprb.transform.position + new Vector3(movement.x, movement.y, 0);
                 }
             }
 
+            // Set position and velocity
+            pprb.velocity = velocity;
             pprb.transform.position = newPosition;
-            
+
         }
     }
 }

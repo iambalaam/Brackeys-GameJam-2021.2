@@ -1,29 +1,35 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class PPCollisions : MonoBehaviour
 {
-    private SpriteRenderer renderer;
-
     // Unity connected
     public Sprite foreground;
+
+    private SpriteRenderer renderer;
+    private float ppu;
 
     public void Start()
     {
         renderer = GetComponent<SpriteRenderer>();
         renderer.sprite = foreground;
+        ppu = foreground.pixelsPerUnit;
     }
 
     public Vector2Int World2Pixel(Vector3 worldPos)
     {
-        float ppu = foreground.pixelsPerUnit;
-
         var worldOffset = (worldPos - transform.position) * ppu;
         var spriteOffset = new Vector2Int(foreground.texture.width / 2, foreground.texture.height / 2);
-
         return new Vector2Int((int)(worldOffset.x), (int)(worldOffset.y)) + spriteOffset;
+    }
+
+    public Vector3 Pixel2World(Vector2Int pixelPos)
+    {
+        var pixelOffset = new Vector3((float)pixelPos.x, (float)pixelPos.y, 0) / ppu;
+        var spriteOffset = new Vector3(foreground.texture.width / 2, foreground.texture.height / 2, 0) / ppu;
+        return transform.position + pixelOffset - spriteOffset;
     }
 
     public bool PointCollision(Vector2Int pixel)
@@ -32,29 +38,57 @@ public class PPCollisions : MonoBehaviour
         return c.a != 0; // Not transparent
     }
 
-    private float Hypot(int a, int b)
+    private float Hypot(float a, float b)
     {
         return Mathf.Sqrt(Mathf.Pow(a, 2) + Mathf.Pow(b, 2));
     }
 
-    public Vector2Int? CircleCollision(Vector2Int center, int radius)
+    /*
+     * Check a circle for collision
+     * Return a Vector2 in the direction of collision with magnitude of collision depth
+     */
+    public Vector3? CircleCollision(Vector3 center, float radius)
     {
-        for (int height = radius; height >= -radius; height--)
+
+        Vector2Int pixelCenter = World2Pixel(center);
+        int pixelRadius = (int)(radius * ppu);
+        float skinnedRadius = radius + 0.5f / ppu;
+
+        List<Vector2Int> pixelCollisions = new List<Vector2Int>();
+
+        for (int height = -pixelRadius; height <= pixelRadius; height++)
         {
-            int y = center.y - height;
+            // check middle
+            Vector2Int centerPixel = new Vector2Int(pixelCenter.x, pixelCenter.y + height);
+            if (PointCollision(centerPixel)) { pixelCollisions.Add(centerPixel); }
 
-            if (PointCollision(new Vector2Int(center.x, y))) return new Vector2Int(0, -height);
-
-
-            for (int width = 1; Hypot(height, width) < radius + 0.5f; width++)
+            for (int width = 1; Hypot(width, height) < pixelRadius; width++)
             {
-                int x1 = center.x + width;
-                int x2 = center.x - width;
-                if (PointCollision(new Vector2Int(x1, y))) return new Vector2Int(width, -height);
-                if (PointCollision(new Vector2Int(x2, y))) return new Vector2Int(-width, -height);
+                Vector2Int leftPixel = new Vector2Int(pixelCenter.x - width, pixelCenter.y + height);
+                Vector2Int rightPixel = new Vector2Int(pixelCenter.x + width, pixelCenter.y + height);
+                if (PointCollision(leftPixel)) { pixelCollisions.Add(leftPixel); }
+                if (PointCollision(rightPixel)) { pixelCollisions.Add(rightPixel); }
             }
         }
-        return null;
+
+        // No collisions
+        if (pixelCollisions.Count == 0) return null;
+
+        Debug.Log(Pixel2World(new Vector2Int(129, 159)));
+
+        // Get deepest collision
+        Vector3 deepestCollision = Vector3.zero;
+        for (int i = 0; i < pixelCollisions.Count; i++)
+        {
+            var collisionFromCenter = Pixel2World(pixelCollisions[i]) - center;
+            var collisionWithDepth = (skinnedRadius - collisionFromCenter.magnitude) * collisionFromCenter.normalized;
+            if (collisionWithDepth.magnitude > deepestCollision.magnitude)
+            {
+                deepestCollision = collisionWithDepth;
+            }
+        }
+
+        return deepestCollision;
     }
 
     private void SetTexture(SpriteRenderer r, Texture2D t)

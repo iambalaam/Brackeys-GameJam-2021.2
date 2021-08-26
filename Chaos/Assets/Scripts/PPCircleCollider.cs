@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class PPCircleCollider : MonoBehaviour
 {
-    public Vector2Int offset;
-    public int radius;
+    public Vector2Int offsetPx;
+    public float radius;
 
     [Range (0,1)]
     public float friction;
@@ -16,7 +16,7 @@ public class PPCircleCollider : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector3 worldOffset = new Vector3(offset.x, offset.y, 0);
-        Gizmos.DrawWireSphere(transform.position + worldOffset / PPU, radius/ PPU);
+        Vector3 worldOffset = new Vector3(offsetPx.x, offsetPx.y, 0);
+        Gizmos.DrawWireSphere(transform.position + worldOffset / PPU, radius);
     }
 }

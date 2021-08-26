@@ -9,4 +9,6 @@ public class PPRB : MonoBehaviour
     void OnDisable() => PPPhysics.pprbs.Remove(this);
 
     public Vector2 velocity = Vector2.zero;
+    public float targetXVelocity;
+    public float targetYVelocity;
 }
