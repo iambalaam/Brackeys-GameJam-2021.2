@@ -58,8 +58,9 @@ public class PPPhysics : MonoBehaviour
                     */
 
                     // Apply impulse against collision and recalculate position
-                    velocity -= new Vector2(collision.x, collision.y) / Time.fixedDeltaTime;
-                    velocity *= 0.8f;
+                    var impulse = new Vector2(collision.x, collision.y) / Time.fixedDeltaTime;
+                    velocity -= impulse * (1 + collider.bounciness);
+                    velocity *= 0.9f;
                     movement = velocity * Time.fixedDeltaTime;
                     newPosition = pprb.transform.position + new Vector3(movement.x, movement.y, 0);
                 }
